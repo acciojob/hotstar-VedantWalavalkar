@@ -59,4 +59,11 @@ public class ProductionHouse {
     public void setRatings(double ratings) {
         this.ratings = ratings;
     }
+
+    public ProductionHouse(int id, String name, double ratings, List<WebSeries> webSeriesList) {
+        this.id = id;
+        this.name = name;
+        this.ratings = ratings;
+        this.webSeriesList = webSeriesList;
+    }
 }

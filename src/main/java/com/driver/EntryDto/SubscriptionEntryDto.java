@@ -27,6 +27,9 @@ public class SubscriptionEntryDto {
         return subscriptionType;
     }
 
+    public SubscriptionEntryDto() {
+    }
+
     public void setSubscriptionType(SubscriptionType subscriptionType) {
         this.subscriptionType = subscriptionType;
     }

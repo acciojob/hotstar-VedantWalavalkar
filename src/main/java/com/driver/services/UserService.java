@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -25,16 +26,42 @@ public class UserService {
     public Integer addUser(User user){
 
         //Jut simply add the user to the Db and return the userId returned by the repository
-        return null;
+        User savedUser = userRepository.save(user);
+
+        return savedUser.getId();
     }
 
     public Integer getAvailableCountOfWebSeriesViewable(Integer userId){
 
         //Return the count of all webSeries that a user can watch based on his ageLimit and subscriptionType
         //Hint: Take out all the Webseries from the WebRepository
+        List<WebSeries> webSeriesList = webSeriesRepository.findAll();
+        Optional<User> optionalUser = userRepository.findById(userId);
+        User user = optionalUser.get();
+        int userAge = user.getAge();
+        SubscriptionType userSubscriptionType = user.getSubscription().getSubscriptionType();
+        int countOfAvailableWebSeries = 0;
 
+        if(userSubscriptionType == SubscriptionType.BASIC) {
+            for (WebSeries ws : webSeriesList) {
+                if (ws.getSubscriptionType() == userSubscriptionType && ws.getAgeLimit() <= user.getAge())
+                    countOfAvailableWebSeries++;
+            }
+        }
+        else if(userSubscriptionType == SubscriptionType.PRO){
+            for (WebSeries ws : webSeriesList) {
+                if ((ws.getSubscriptionType() == userSubscriptionType || ws.getSubscriptionType() == SubscriptionType.BASIC) && ws.getAgeLimit() <= user.getAge())
+                    countOfAvailableWebSeries++;
+            }
+        }
+        else{
+            for (WebSeries ws : webSeriesList) {
+                if (ws.getAgeLimit() <= user.getAge())
+                    countOfAvailableWebSeries++;
+            }
+        }
 
-        return null;
+        return countOfAvailableWebSeries;
     }
 
 

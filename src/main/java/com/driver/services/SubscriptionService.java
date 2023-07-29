@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SubscriptionService {
@@ -26,7 +27,39 @@ public class SubscriptionService {
 
         //Save The subscription Object into the Db and return the total Amount that user has to pay
 
-        return null;
+        // 1. Check for the user
+        Optional<User> optionalUser = userRepository.findById(subscriptionEntryDto.getUserId());
+        User user = optionalUser.get();
+
+        // 2. Calculate total amount to be paid
+
+        int total = 0;
+        SubscriptionType subscriptionType = subscriptionEntryDto.getSubscriptionType();
+        int noOfScreens = subscriptionEntryDto.getNoOfScreensRequired();
+
+        if(subscriptionType == SubscriptionType.BASIC)
+            total = 500 + (200 * noOfScreens);
+        else if(subscriptionType == SubscriptionType.PRO)
+            total = 800 + (250 * noOfScreens);
+        else
+            total = 1000 + (350 * noOfScreens);
+
+
+        // 3. Create a subscription
+        Subscription subscription = new Subscription();
+        subscription.setUser(user);
+        subscription.setSubscriptionType(subscriptionEntryDto.getSubscriptionType());
+        subscription.setNoOfScreensSubscribed(subscriptionEntryDto.getNoOfScreensRequired());
+        Date date = new Date();
+        subscription.setStartSubscriptionDate(date);
+        subscription.setTotalAmountPaid(total);
+
+        user.setSubscription(subscription);
+
+        Subscription savedSubscription = subscriptionRepository.save(subscription);
+
+
+        return savedSubscription.getTotalAmountPaid();
     }
 
     public Integer upgradeSubscription(Integer userId)throws Exception{
@@ -34,16 +67,47 @@ public class SubscriptionService {
         //If you are already at an ElITE subscription : then throw Exception ("Already the best Subscription")
         //In all other cases just try to upgrade the subscription and tell the difference of price that user has to pay
         //update the subscription in the repository
+        Optional<User> optionalUser = userRepository.findById(userId);
+        User user = optionalUser.get();
+        Subscription subscription = user.getSubscription();
+        if(subscription.getSubscriptionType() == SubscriptionType.ELITE)
+            throw new Exception("Already the best Subscription");
 
-        return null;
+        int currentPlanPrice = subscription.getTotalAmountPaid();
+        int priceDifference = 0;
+        int noOfScreens = subscription.getNoOfScreensSubscribed();
+
+        if(subscription.getSubscriptionType() == SubscriptionType.BASIC){
+            subscription.setSubscriptionType(SubscriptionType.PRO);
+            int newPlanPrice = 800 + (250 * noOfScreens);
+            priceDifference = newPlanPrice - currentPlanPrice;
+            subscription.setTotalAmountPaid(newPlanPrice);
+        }
+        else{
+            subscription.setSubscriptionType(SubscriptionType.ELITE);
+            int newPlanPrice = 1000 + (350 * noOfScreens);
+            priceDifference = newPlanPrice - currentPlanPrice;
+            subscription.setTotalAmountPaid(newPlanPrice);
+        }
+
+        subscriptionRepository.save(subscription);
+
+        return priceDifference;
     }
 
     public Integer calculateTotalRevenueOfHotstar(){
 
         //We need to find out total Revenue of hotstar : from all the subscriptions combined
         //Hint is to use findAll function from the SubscriptionDb
+        int totalRevenue = 0;
+        List<User> users = userRepository.findAll();
+        for(User user : users){
+            Subscription subscription = user.getSubscription();
+            if(subscription != null)
+                totalRevenue += subscription.getTotalAmountPaid();
+        }
 
-        return null;
+        return totalRevenue;
     }
 
 }
