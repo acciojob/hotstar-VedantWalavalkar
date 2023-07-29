@@ -273,6 +273,8 @@ public class SubscriptionService {
 
         // 1. Check for the user
         Optional<User> optionalUser = userRepository.findById(subscriptionEntryDto.getUserId());
+        if(!optionalUser.isPresent())
+            return 0;
         User user = optionalUser.get();
 
         // 2. Calculate total amount to be paid
@@ -312,8 +314,12 @@ public class SubscriptionService {
         //In all other cases just try to upgrade the subscription and tell the difference of price that user has to pay
         //update the subscription in the repository
         Optional<User> optionalUser = userRepository.findById(userId);
+        if(!optionalUser.isPresent())
+            throw new Exception("User not found");
         User user = optionalUser.get();
         Subscription subscription = user.getSubscription();
+        if(subscription == null)
+            throw new Exception("No subscription");
         if(subscription.getSubscriptionType() == SubscriptionType.ELITE)
             throw new Exception("Already the best Subscription");
 
@@ -345,6 +351,7 @@ public class SubscriptionService {
         //Hint is to use findAll function from the SubscriptionDb
         int totalRevenue = 0;
         List<User> users = userRepository.findAll();
+        if(users.size()==0) return 0;
         for(User user : users){
             Subscription subscription = user.getSubscription();
             if(subscription != null)

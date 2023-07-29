@@ -150,7 +150,7 @@ public class ProductionHouseService {
 //        productionHouse.setWebSeriesList(new ArrayList<>());
 
         ProductionHouse savedProductionHouse = productionHouseRepository.save(productionHouse);
-        return  0;
+        return  1;
     }
 
 

@@ -291,6 +291,8 @@ public class WebSeriesService {
         newSeries.setSubscriptionType(webSeriesEntryDto.getSubscriptionType());
 
         Optional<ProductionHouse> optionalProductionHouse = productionHouseRepository.findById(webSeriesEntryDto.getProductionHouseId());
+        if(!optionalProductionHouse.isPresent())
+            throw new Exception("Production house not found");
         ProductionHouse productionHouse = optionalProductionHouse.get();
         productionHouse.getWebSeriesList().add(newSeries);
         newSeries.setProductionHouse(productionHouse);
