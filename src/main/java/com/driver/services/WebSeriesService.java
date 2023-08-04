@@ -306,8 +306,8 @@ public class WebSeriesService {
         productionHouse.setRatings(avg_rating);
 
         ProductionHouse savedProductionHouse = productionHouseRepository.save(productionHouse);
-
-        return savedProductionHouse.getId();
+        webSeries = webSeriesRepository.save(webSeries);
+        return webSeries.getId();
     }
 
 }
